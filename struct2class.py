@@ -226,11 +226,18 @@ class %s:
 ''')
     pyout.close()
 
+    try:
+        tidy.tidy_up (file_in=pyout.name, file_out=pyout.name)        # use tidy module to tidy up
+    except SyntaxError:
+        print "Error: syntax error when trying to tidy code."
 
-    tidy.tidy_up (file_in=newfilename, file_out=newfilename)        # use tidy module to tidy up
+
     
 
 
+if len(sys.argv) < 2:
+    print "Not enough arguments, exiting."
+    sys.exit(0)
 
 filename = sys.argv[1]
 newfilename = sys.argv[2]
