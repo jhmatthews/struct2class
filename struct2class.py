@@ -5,6 +5,8 @@ import sys
 import os
 import numpy as np
 import tidy
+import keyword
+
 
 
 def prepare_files(filename, newfilename):
@@ -83,6 +85,8 @@ def convert_h_to_classes(f, pyout):
 ....and output to a file pyout which will contain class definitions
 ....with the same names, and any #define statements as variables 
 ....'''
+
+    klist = np.array(keyword.kwlist)    # list of python keywords
 
     defs_array = np.array([])
     defvals_array = np.array([])
@@ -174,9 +178,16 @@ def convert_h_to_classes(f, pyout):
 
                         t = data[0]
 
+                        # check if its a pointer, remove * and comment on it
                         if "*" in var:
                             var = strip("*", var)
                             t = "pointer, " + t
+
+                        # finally, check if it is a python keyword
+                        check = (klist == var)
+                        if np.sum(check) > 0:   # it's a keyword, so add a _
+                            var = "_" + var
+
 
                         structures[nstructs
                                    - 1].variables.append(var)
@@ -201,35 +212,37 @@ def convert_h_to_classes(f, pyout):
 
     for i in range(len(structures)):
 
-        classname = structures[i].name
+        if len(structures[i].variables) > 0:
 
-        pyout.write('''
+            classname = structures[i].name
+
+            pyout.write('''
 class %s:
 ''' % classname)
 
-        pyout.write('\tdef __init__(self')
+            pyout.write('\tdef __init__(self')
 
-        for j in range(len(structures[i].variables)):
-            pyout.write(', %s' % structures[i].variables[j])
+            for j in range(len(structures[i].variables)):
+                pyout.write(', %s' % structures[i].variables[j])
 
-        pyout.write('):\n')
+            pyout.write('):\n')
 
-        for j in range(len(structures[i].variables)):
+            for j in range(len(structures[i].variables)):
 
-            pyout.write('\t\tself.%s = %s    #type %s\n'
-                        % (structures[i].variables[j],
-                        structures[i].variables[j],
-                        structures[i].types[j]))
+                pyout.write('\t\tself.%s = %s    #type %s\n'
+                            % (structures[i].variables[j],
+                            structures[i].variables[j],
+                            structures[i].types[j]))
 
-        pyout.write('''
+            pyout.write('''
 
-''')
+    ''')
     pyout.close()
 
     try:
         tidy.tidy_up (file_in=pyout.name, file_out=pyout.name)        # use tidy module to tidy up
     except SyntaxError:
-        print "Error: syntax error when trying to tidy code."
+        print "Error: syntax error when trying to tidy code. Can't deal with this."
 
 
     
