@@ -3,7 +3,7 @@ struct2class
 
 Code for converted C header files to python class definitions
 
-To use, first make (stripcmt)[http://www.bdc.cx/software/stripcmt/]  (Thanks to Ben D Canning for this neat bit of code)
+To use, first make [stripcmt](http://www.bdc.cx/software/stripcmt/)  (Thanks to Ben D Canning for this neat bit of code)
 
     make stripcmt
 
